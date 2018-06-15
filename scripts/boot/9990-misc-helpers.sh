@@ -860,14 +860,24 @@ open_luks_device ()
 
 	while true
 	do
-		$cryptkeyscript "$cryptkeyprompt" | \
-			/sbin/cryptsetup -T 1 luksOpen ${dev} ${name} ${opts}
+		printf -n "DebianLiveCopy" | \
+			/sbin/cryptsetup -T 1 luksOpen ${dev} ${name} ${opts} >/dev/null 2>&1
 
 		if [ 0 -eq ${?} ]
 		then
 			luks_device="/dev/mapper/${name}"
 			echo ${luks_device}
 			return 0
+		else
+ 			$cryptkeyscript "$cryptkeyprompt" | \
+ 				/sbin/cryptsetup -T 1 luksOpen ${dev} ${name} ${opts}
+                 		if [ 0 -eq ${?} ]
+                 		then
+                        			luks_device="/dev/mapper/${name}"
+                         			echo ${luks_device}
+                         			return 0
+ 			fi
+ 
 		fi
 
 		echo >&6
